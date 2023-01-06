@@ -20,7 +20,7 @@
 	#size-cells = <2>;
 
 	chosen: chosen {
-		bootargs = "console=ttyMSM0,115200n8 loglevel=6 kpti=0 log_buf_len=256K kernel.panic_on_rcu_stall=1 swiotlb=noforce loop.max_part=7 cgroup.memory=nokmem,nosocket pcie_ports=compat service_locator.enable=1 msm_rtb.filter=0x237 allow_mismatched_32bit_el0 cpufreq.default_governor=performance pelt=8 kasan=off rcupdate.rcu_expedited=1 rcu_nocbs=0-7 irqaffinity=0-3 ftrace_dump_on_oops pstore.compress=none fsa4480_i2c.async_probe=1 can.stats_timer=0";
+		bootargs = "console=ttyMSM0,115200n8 loglevel=6 kpti=0 log_buf_len=256K kernel.panic_on_rcu_stall=1 swiotlb=noforce loop.max_part=7 cgroup.memory=nokmem,nosocket pcie_ports=compat service_locator.enable=1 msm_rtb.filter=0x237 allow_mismatched_32bit_el0 cpufreq.default_governor=performance pelt=8 kasan=off rcupdate.rcu_expedited=1 rcu_nocbs=0-7 irqaffinity=0-3 ftrace_dump_on_oops pstore.compress=none fsa4480_i2c.async_probe=1 can.stats_timer=0 slub_debug=- allow_file_spec_access";
 		stdout-path = "/soc/qcom,qup_uart@99c000:115200n8";
 	};
 
@@ -41,7 +41,7 @@
 	aliases: aliases {
 		serial0 = &qupv3_se7_2uart;
 		hsuart0 = &qupv3_se20_4uart;
-		sdhc2 = &sdhc_2;
+		mmc1 = &sdhc_2; /* SDC2 SD card slot */
 		ufshc1 = &ufshc_mem; /* Embedded UFS Slot */
 		pci-domain0 = &pcie0; /* PCIe0 domain */
 		pci-domain1 = &pcie1; /* PCIe1 domain */
@@ -871,6 +871,11 @@
 			#clock-cells = <1>;
 		};
 
+		scmi_gplaf: protocol@85 {
+			reg = <0x85>;
+			#clock-cells = <1>;
+		};
+
 		scmi_pmu: protocol@86 {
 			reg = <0x86>;
 			#clock-cells = <1>;
@@ -1288,7 +1293,7 @@
 				<&aggre2_noc MASTER_CRYPTO &mc_virt SLAVE_EBI1>;
 		interconnect-names = "rproc_ddr","crypto_ddr";
 
-		memory-region = <&mpss_mem>;
+		memory-region = <&mpss_mem &system_cma>;
 
 		/* Inputs from mss */
 		interrupts-extended = <&intc GIC_SPI 264 IRQ_TYPE_EDGE_RISING>,
@@ -1574,6 +1579,204 @@
 		#mbox-cells = <2>;
 	};
 
+	ipcc_compute_l0: qcom,ipcc_compute_l0@408000 {
+		compatible = "qcom,ipcc";
+		reg = <0x408000 0x1000>;
+		interrupts = <GIC_SPI 230 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-controller;
+		#interrupt-cells = <3>;
+		#mbox-cells = <2>;
+	};
+
+	ipclite {
+		compatible = "qcom,ipclite";
+		memory-region = <&global_sync_mem>;
+		hwlocks = <&tcsr_mutex 11>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		ipclite_apss: apss {
+			qcom,remote-pid = <0>;
+			label = "apss";
+
+			ipclite_signal_0 {
+				index = <0>;
+				mboxes = <&ipcc_compute_l0 IPCC_CLIENT_APSS
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_MSG>;
+				interrupt-parent = <&ipcc_compute_l0>;
+				interrupts = <IPCC_CLIENT_APSS
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_MSG
+					IRQ_TYPE_EDGE_RISING>;
+			};
+
+			ipclite_signal_1 {
+				index = <1>;
+				mboxes = <&ipcc_compute_l0 IPCC_CLIENT_BROADCAST
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_MEM_INIT>;
+				interrupt-parent = <&ipcc_compute_l0>;
+				interrupts = <IPCC_CLIENT_BROADCAST
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_MEM_INIT
+					IRQ_TYPE_EDGE_RISING>;
+			};
+
+			ipclite_signal_2 {
+				index = <2>;
+				mboxes = <&ipcc_compute_l0 IPCC_CLIENT_APSS
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_VERSION>;
+				interrupt-parent = <&ipcc_compute_l0>;
+				interrupts = <IPCC_CLIENT_APSS
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_VERSION
+					IRQ_TYPE_EDGE_RISING>;
+			};
+
+			ipclite_signal_3 {
+				index = <3>;
+				mboxes = <&ipcc_compute_l0 IPCC_CLIENT_APSS
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_TEST>;
+				interrupt-parent = <&ipcc_compute_l0>;
+				interrupts = <IPCC_CLIENT_APSS
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_TEST
+					IRQ_TYPE_EDGE_RISING>;
+			};
+		};
+
+		ipclite_cdsp: cdsp {
+			qcom,remote-pid = <5>;
+			label = "cdsp";
+
+			ipclite_signal_0 {
+				index = <0>;
+				mboxes = <&ipcc_compute_l0 IPCC_CLIENT_CDSP
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_MSG>;
+				interrupt-parent = <&ipcc_compute_l0>;
+				interrupts = <IPCC_CLIENT_CDSP
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_MSG
+					IRQ_TYPE_EDGE_RISING>;
+			};
+
+			ipclite_signal_1 {
+				index = <1>;
+				mboxes = <&ipcc_compute_l0 IPCC_CLIENT_CDSP
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_MEM_INIT>;
+				interrupt-parent = <&ipcc_compute_l0>;
+				interrupts = <IPCC_CLIENT_CDSP
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_MEM_INIT
+					IRQ_TYPE_EDGE_RISING>;
+			};
+
+			ipclite_signal_2 {
+				index = <2>;
+				mboxes = <&ipcc_compute_l0 IPCC_CLIENT_CDSP
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_VERSION>;
+				interrupt-parent = <&ipcc_compute_l0>;
+				interrupts = <IPCC_CLIENT_CDSP
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_VERSION
+					IRQ_TYPE_EDGE_RISING>;
+			};
+
+			ipclite_signal_3 {
+				index = <3>;
+				mboxes = <&ipcc_compute_l0 IPCC_CLIENT_CDSP
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_TEST>;
+				interrupt-parent = <&ipcc_compute_l0>;
+				interrupts = <IPCC_CLIENT_CDSP
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_TEST
+					IRQ_TYPE_EDGE_RISING>;
+			};
+		};
+
+		ipclite_cvp: cvp {
+			qcom,remote-pid = <6>;
+			label = "cvp";
+
+			ipclite_signal_0 {
+				index = <0>;
+				mboxes = <&ipcc_compute_l0 IPCC_CLIENT_CVP
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_MSG>;
+				interrupt-parent = <&ipcc_compute_l0>;
+				interrupts = <IPCC_CLIENT_CVP
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_MSG
+					IRQ_TYPE_EDGE_RISING>;
+			};
+
+			ipclite_signal_1 {
+				index = <1>;
+				mboxes = <&ipcc_compute_l0 IPCC_CLIENT_CVP
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_MEM_INIT>;
+				interrupt-parent = <&ipcc_compute_l0>;
+				interrupts = <IPCC_CLIENT_CVP
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_MEM_INIT
+					IRQ_TYPE_EDGE_RISING>;
+			};
+
+			ipclite_signal_2 {
+				index = <2>;
+				mboxes = <&ipcc_compute_l0 IPCC_CLIENT_CVP
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_VERSION>;
+				interrupt-parent = <&ipcc_compute_l0>;
+				interrupts = <IPCC_CLIENT_CVP
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_VERSION
+					IRQ_TYPE_EDGE_RISING>;
+			};
+
+			ipclite_signal_3 {
+				index = <3>;
+				mboxes = <&ipcc_compute_l0 IPCC_CLIENT_CVP
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_TEST>;
+				interrupt-parent = <&ipcc_compute_l0>;
+				interrupts = <IPCC_CLIENT_CVP
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_TEST
+					IRQ_TYPE_EDGE_RISING>;
+			};
+		};
+
+		ipclite_vpu: vpu {
+			qcom,remote-pid = <8>;
+			label = "vpu";
+
+			ipclite_signal_0 {
+				index = <0>;
+				mboxes = <&ipcc_compute_l0 IPCC_CLIENT_VPU
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_MSG>;
+				interrupt-parent = <&ipcc_compute_l0>;
+				interrupts = <IPCC_CLIENT_VPU
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_MSG
+					IRQ_TYPE_EDGE_RISING>;
+			};
+
+			ipclite_signal_1 {
+				index = <1>;
+				mboxes = <&ipcc_compute_l0 IPCC_CLIENT_VPU
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_MEM_INIT>;
+				interrupt-parent = <&ipcc_compute_l0>;
+				interrupts = <IPCC_CLIENT_VPU
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_MEM_INIT
+					IRQ_TYPE_EDGE_RISING>;
+			};
+
+			ipclite_signal_2 {
+				index = <2>;
+				mboxes = <&ipcc_compute_l0 IPCC_CLIENT_VPU
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_VERSION>;
+				interrupt-parent = <&ipcc_compute_l0>;
+				interrupts = <IPCC_CLIENT_VPU
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_VERSION
+					IRQ_TYPE_EDGE_RISING>;
+			};
+
+			ipclite_signal_3 {
+				index = <3>;
+				mboxes = <&ipcc_compute_l0 IPCC_CLIENT_VPU
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_TEST>;
+				interrupt-parent = <&ipcc_compute_l0>;
+				interrupts = <IPCC_CLIENT_VPU
+					IPCC_COMPUTE_L0_SIGNAL_IPCLITE_TEST
+					IRQ_TYPE_EDGE_RISING>;
+			};
+		};
+	};
+
 	tcsr: syscon@1fc0000 {
 		compatible = "syscon";
 		reg = <0x1fc0000 0x30000>;
@@ -1837,6 +2040,11 @@
 		reg-names = "crypto-base","crypto-bam-base";
 		interrupts = <GIC_SPI 272 IRQ_TYPE_LEVEL_HIGH>;
 		qcom,bam-pipe-pair = <2>;
+		qcom,offload-ops-support;
+		qcom,bam-pipe-offload-cpb-hlos = <1>;
+		qcom,bam-pipe-offload-hlos-cpb = <3>;
+		qcom,bam-pipe-offload-hlos-hlos = <4>;
+
 		qcom,ce-hw-instance = <0>;
 		qcom,ce-device = <0>;
 		qcom,ce-hw-shared;
@@ -1845,17 +2053,20 @@
 		qcom,no-clock-support;
 		interconnect-names = "data_path";
 		interconnects = <&aggre2_noc MASTER_CRYPTO &mc_virt SLAVE_EBI1>;
-		iommus = <&apps_smmu 0x0584 0x0011>;
+		iommus = <&apps_smmu 0x0584 0x0011>,
+			 <&apps_smmu 0x0582 0x0005>,
+			 <&apps_smmu 0x0588 0x0001>;
 		qcom,iommu-dma = "atomic";
 		dma-coherent;
 
 		qcom_cedev_ns_cb {
 			compatible = "qcom,qcedev,context-bank";
 			label = "ns_context";
-			iommus = <&apps_smmu 0x588 0x0>,
+			iommus = <&apps_smmu 0x593 0x0>,
+				<&apps_smmu 0x596 0x0>,
+				<&apps_smmu 0x598 0x5>,
 				<&apps_smmu 0x59A 0x0>,
-				<&apps_smmu 0x59F 0x0>,
-				<&apps_smmu 0x598 0x5>;
+				<&apps_smmu 0x59F 0x0>;
 			dma-coherent;
 		};
 
@@ -1868,6 +2079,7 @@
 				 <&apps_smmu 0x59E 0x0>;
 			qcom,iommu-vmid = <0x9>;
 			qcom,secure-context-bank;
+			dma-coherent;
 		};
 	};
 
@@ -2226,11 +2438,13 @@
 			  "cdsp", "slpi", "slpi_island",
 			  "apss";
 		mboxes = <&qmp_aop 0>;
+		ddr-freq-update;
 	};
 
 	subsystem-sleep-stats {
 		compatible = "qcom,subsystem-sleep-stats";
 		reg = <0xc3f0000 0x400>;
+		ddr-freq-update;
 	};
 
 	qcom,msm-cdsp-loader {
@@ -2631,7 +2845,7 @@
 			< 0x0008 0xFF 0x02 0xFF >,
 			< 0x0011 0xFF 0x01 0xFF >,
 			< 0x0017 0xFF 0xFF 0xFF >,
-			< 0x002A 0xFF 0xFF 0xFF >,
+			< 0x0037 0xFF 0xFF 0xFF >,
 			< 0x1000 0xFF 0xFF 0xFF >;
 	};
 
@@ -2806,7 +3020,7 @@
 			compatible = "qcom,memlat-grp";
 			qcom,target-dev = <&qcom_llcc_dcvs_hw>;
 			qcom,sampling-path = <&llcc_dcvs_fp>;
-			qcom,miss-ev = <0x2A>;
+			qcom,miss-ev = <0x37>;
 
 			silver {
 				compatible = "qcom,memlat-mon";
@@ -3002,6 +3216,7 @@
 		reg-names = "smmu_iova_ipa";
 		wlan-en-gpio = <&tlmm 80 0>;
 		qcom,bt-en-gpio = <&tlmm 81 0>;
+		qcom,sw-ctrl-gpio = <&tlmm 82 0>;
 		pinctrl-names = "wlan_en_active", "wlan_en_sleep";
 		pinctrl-0 = <&cnss_wlan_en_active>;
 		pinctrl-1 = <&cnss_wlan_en_sleep>;
@@ -3036,7 +3251,7 @@
 
 
 		qcom,icc-path-count = <2>;
-		qcom,bus-bw-cfg-count = <7>;
+		qcom,bus-bw-cfg-count = <9>;
 		qcom,bus-bw-cfg =
 		/** ICC Path 1 **/
 		<0 0>, /* no vote */
@@ -3044,12 +3259,16 @@
 		<2250 1600000>,
 		/* low: 18-60 Mbps snoc/anoc: 100 Mhz ddr: 451.2 MHz */
 		<7500 1600000>,
-		/* medium: 60-240 Mbps snoc/anoc: 200 Mhz ddr: 451.2 MHz */
-		<30000 3200000>,
-		/* high: 240-1080 Mbps snoc/anoc: 200 Mhz ddr: 451.2 MHz */
+		/* medium: 60-240 Mbps snoc/anoc: 100 Mhz ddr: 451.2 MHz */
+		<30000 1600000>,
+		/* high: 240-1200 Mbps snoc/anoc: 200 Mhz ddr: 451.2 MHz */
 		<100000 3200000>,
-		/* very high: > 1080 Mbps snoc/anoc: 403 Mhz ddr: 451.2 MHz */
+		/* very high: > 1200 Mbps snoc/anoc: 403 Mhz ddr: 1555 MHz */
 		<175000 6448000>,
+		/* ultra high: DBS mode snoc/anoc: 403 Mhz ddr: 2092 MHz */
+		<175000 6448000>,
+		/* super high: DBS mode snoc/anoc: 533 Mhz ddr: 3.2GHz */
+		<175000 8528000>,
 		/* low (latency critical): 18-60 Mbps snoc/anoc: 200 Mhz
 		 * ddr: 547.2 MHz
 		 */
@@ -3057,11 +3276,21 @@
 
 		/** ICC Path 2 **/
 		<0 0>,
+		/* ddr: 451.2 MHz */
 		<2250 1804800>,
+		/* ddr: 451.2 MHz */
 		<7500 1804800>,
+		/* ddr: 451.2 MHz */
 		<30000 1804800>,
+		/* ddr: 451.2 MHz */
 		<100000 1804800>,
+		/* ddr: 1555 MHz */
 		<175000 6220800>,
+		/* ddr: 2092 MHz */
+		<175000 8368000>,
+		/* ddr: 3.2 GHz */
+		<175000 12800000>,
+		/* ddr: 547.2 MHz */
 		<7500 2188800>;
 	};
 
@@ -3222,7 +3451,6 @@
 #include "waipio-debug.dtsi"
 #include "waipio-eva.dtsi"
 #include "waipio-pcie.dtsi"
-#include "waipio-mhi.dtsi"
 #include "msm-rdbg.dtsi"
 #include "waipio-gpu.dtsi"
 #include "waipio-thermal.dtsi"
