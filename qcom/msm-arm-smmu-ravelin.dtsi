@@ -48,7 +48,7 @@
 			reg = <0x3dc9000 0x1000>,
 				<0x3dc2208 0x8>;
 			reg-names = "base", "status-reg";
-			qcom,stream-id-range = <0x1000 0x400>;
+			qcom,stream-id-range = <0x400 0x400>;
 		};
 	};
 
@@ -72,8 +72,8 @@
 				<GIC_SPI 94 IRQ_TYPE_LEVEL_HIGH>,
 				<GIC_SPI 95 IRQ_TYPE_LEVEL_HIGH>,
 				<GIC_SPI 96 IRQ_TYPE_LEVEL_HIGH>,
+				<GIC_SPI 670 IRQ_TYPE_LEVEL_HIGH>,
 				<GIC_SPI 671 IRQ_TYPE_LEVEL_HIGH>,
-				<GIC_SPI 672 IRQ_TYPE_LEVEL_HIGH>,
 				<GIC_SPI 97 IRQ_TYPE_LEVEL_HIGH>,
 				<GIC_SPI 98 IRQ_TYPE_LEVEL_HIGH>,
 				<GIC_SPI 99 IRQ_TYPE_LEVEL_HIGH>,

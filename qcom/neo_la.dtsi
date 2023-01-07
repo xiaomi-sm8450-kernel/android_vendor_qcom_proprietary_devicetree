@@ -413,6 +413,9 @@
 	qcom,bcm-voters = <&apps_bcm_voter>;
 };
 
+
+#include "neo_la-reserved-memory.dtsi"
+
 &kgsl_smmu {
 	status = "disabled";
 };
@@ -455,5 +458,21 @@
 };
 
 &gmu {
+	status = "disabled";
+};
+
+&mdp_0_tbu {
+	status = "disabled";
+};
+
+&mdp_1_tbu {
+	status = "disabled";
+};
+
+&lsr_0_tbu {
+	status = "disabled";
+};
+
+&lsr_1_tbu {
 	status = "disabled";
 };
