@@ -44,12 +44,6 @@
                 0x14 0x74>;
 };
 
-&usb0 {
-	dwc3@a600000 {
-		maximum-speed = "high-speed";
-	};
-};
-
 &battery_charger {
 	qcom,shutdown-voltage = <3350>;
 };
@@ -151,6 +145,7 @@
 		fts,support-fod;
 		fts,support-thp;
 		fts,support-thp-fw;
+		fts,support-vsync-mode;
 		spi-max-frequency = <12000000>;
 		fts,support-super-resolution = <1>;
 		fts,default-fw-name = "st_fts_l2.ftb";
@@ -694,4 +689,8 @@
 
 &qseecom_ta_mem {
 	size = <0x0 0x2000000>;
+};
+
+&qseecom_mem {
+	size = <0x0 0x2400000>;
 };

@@ -29,15 +29,6 @@
 
 	reserved_memory: reserved-memory { };
 
-	mem-offline {
-		compatible = "qcom,mem-offline";
-		offline-sizes = <0x1 0x40000000 0x0 0x40000000>,
-				<0x1 0xc0000000 0x0 0x80000000>,
-				<0x2 0xc0000000 0x1 0x40000000>;
-		granule = <512>;
-		mboxes = <&qmp_aop 0>;
-	};
-
 	aliases: aliases {
 		serial0 = &qupv3_se7_2uart;
 		hsuart0 = &qupv3_se20_4uart;
@@ -517,7 +508,7 @@
 
 	trust_ui_vm_mem: trust_ui_vm_region@e0b00000 {
 		no-map;
-		//reg = <0x0 0xe0b00000 0x0 0x7a00000>;
+		//reg = <0x0 0xe0b00000 0x0 0x4af3000>;
 	};
 
 	trust_ui_vm_qrtr: trust_ui_vm_qrtr@e55f3000 {
@@ -3183,7 +3174,7 @@
 	trust_ui_vm: qcom,trust_ui_vm@e55fc000 {
 		reg = <0xe55fc000 0x104000>;
 		vm_name = "trustedvm";
-		//shared-buffers = <&trust_ui_vm_vblk0_ring &trust_ui_vm_swiotlb>;
+		shared-buffers = <&trust_ui_vm_vblk0_ring &trust_ui_vm_swiotlb>;
 	};
 
 	qcom,virtio_backend@0 {
