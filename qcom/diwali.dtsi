@@ -26,7 +26,7 @@
 	chosen: chosen {
 		stdout-path = "/soc/qcom,qup_uart@994000:115200n8";
 
-		bootargs = "console=ttyMSM0,115200n8 loglevel=6 log_buf_len=256K kernel.panic_on_rcu_stall=1 loop.max_part=7 pcie_ports=compat msm_rtb.filter=0x237 allow_mismatched_32bit_el0 kasan=off rcupdate.rcu_expedited=1 rcu_nocbs=0-7 ftrace_dump_on_oops pstore.compress=none kpti=0 swiotlb=noforce cgroup.memory=nokmem,nosocket cpufreq.default_governor=performance page_poison=on kswapd_per_node=2 fsa4480_i2c.async_probe=1 can.stats_timer=0 allow_file_spec_access disable_dma32=on";
+		bootargs = "console=ttyMSM0,115200n8 loglevel=6 kernel.panic_on_rcu_stall=1 loop.max_part=7 pcie_ports=compat msm_rtb.filter=0x237 allow_mismatched_32bit_el0 kasan=off rcupdate.rcu_expedited=1 rcu_nocbs=0-7 ftrace_dump_on_oops pstore.compress=none kpti=0 swiotlb=noforce cgroup.memory=nokmem,nosocket cpufreq.default_governor=performance page_poison=on kswapd_per_node=2 fsa4480_i2c.async_probe=1 can.stats_timer=0 allow_file_spec_access disable_dma32=on";
 	};
 
 	memory { device_type = "memory"; reg = <0 0 0 0>; };
@@ -48,6 +48,12 @@
 		hsuart0 = &qupv3_se7_4uart;
 		ufshc1 = &ufshc_mem; /* Embedded UFS Slot */
 		mmc1 = &sdhc_2; /* SDC2 SD card slot */
+		i2c0 = &qupv3_se0_i2c;
+		i2c1 = &qupv3_se2_i2c;
+		i2c2 = &qupv3_se4_i2c;
+		i2c3 = &qupv3_se9_i2c;
+		i2c4 = &qupv3_se12_i2c;
+		i2c5 = &qupv3_se13_i2c;
 	 };
 
 	sram: sram@17D09400 {
@@ -394,8 +400,6 @@
 	ramoops_mem: ramoops_region {
 		compatible = "ramoops";
 		alloc-ranges = <0x0 0x00000000 0xffffffff 0xffffffff>;
-		size = <0x0 0x200000>;
-		pmsg-size = <0x200000>;
 		mem-type = <2>;
 	};
 
@@ -3284,6 +3288,7 @@
 	fsa4480: fsa4480@42 {
 		compatible = "qcom,fsa4480-i2c";
 		reg = <0x42>;
+		qcom,use-power-supply = <1>;
 	};
 };
 
