@@ -181,6 +181,8 @@
 		dma-names = "tx", "rx";
 		qcom,shared;
 		qcom,wrapper-core = <&qupv3_0>;
+		qcom,rtl_se;
+		qcom,bus-recovery;
 		status = "disabled";
 	};
 

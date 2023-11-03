@@ -48,6 +48,7 @@
 		ufshc1 = &ufshc_mem; /* Embedded UFS Slot */
 		serial0 = &qupv3_se3_2uart;
 		hsuart0 = &qupv3_se11_4uart;
+                i2c2 = &qupv3_se2_i2c;
 	};
 
 	sram: sram@17D09100 {
@@ -396,8 +397,6 @@
 	ramoops_mem: ramoops_region {
 		compatible = "ramoops";
 		alloc-ranges = <0x0 0x00000000 0xffffffff 0xffffffff>;
-		size = <0x0 0x200000>;
-		pmsg-size = <0x200000>;
 		mem-type = <2>;
 	};
 

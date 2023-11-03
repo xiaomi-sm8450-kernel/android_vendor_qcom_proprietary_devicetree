@@ -184,10 +184,6 @@
 		USB3_DP_QSERDES_RXB_RX_MODE_01_HIGH4		0x0D>;
 };
 
-&usb0 {
-	ssusb_redriver = <&redriver>;
-};
-
 &qupv3_se9_i2c {
 	status = "ok";
 	qcom,clk-freq-out = <1000000>;

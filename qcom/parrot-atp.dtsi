@@ -1,9 +1,9 @@
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/input/input.h>
 
-#include "parrot-pm7250b.dtsi"
 #include "parrot-pmic-overlay.dtsi"
 #include "parrot-thermal-overlay.dtsi"
+#include "parrot-pm8350b.dtsi"
 
 &soc {
 	gpio_keys {
